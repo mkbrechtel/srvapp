@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: Apache-2.0
+---
+traefik_config_directory: /etc/traefik
+
+traefik_data_directory: /var/lib/traefik
+
+traefik_docker_network: proxy
+
+traefik_acme_email: ""
+
+traefik_image: traefik:v3.2

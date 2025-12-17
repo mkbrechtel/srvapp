@@ -1,0 +1,50 @@
+# SPDX-License-Identifier: Apache-2.0
+---
+- name: Create traefik config directory
+  ansible.builtin.file:
+    path: "{{ traefik_config_directory }}"
+    state: directory
+    mode: "0755"
+
+- name: Create backwards compatibility symlink
+  ansible.builtin.file:
+    src: "{{ traefik_config_directory }}"
+    dest: /srv/traefik
+    state: link
+  when: traefik_config_directory != "/srv/traefik"
+
+- name: Create traefik conf.d directory
+  ansible.builtin.file:
+    path: "{{ traefik_config_directory }}/conf.d"
+    state: directory
+    mode: "0755"
+
+- name: Create traefik data directory
+  ansible.builtin.file:
+    path: "{{ traefik_data_directory }}"
+    state: directory
+    mode: "0700"
+
+- name: Create Docker proxy network
+  community.docker.docker_network:
+    name: "{{ traefik_docker_network }}"
+    state: present
+
+- name: Deploy traefik configuration
+  ansible.builtin.template:
+    src: traefik.yaml.j2
+    dest: "{{ traefik_config_directory }}/traefik.yaml"
+    mode: "0644"
+  notify: Restart traefik
+
+- name: Deploy docker-compose file
+  ansible.builtin.template:
+    src: docker-compose.yaml.j2
+    dest: "{{ traefik_config_directory }}/docker-compose.yaml"
+    mode: "0644"
+  notify: Restart traefik
+
+- name: Start traefik container
+  community.docker.docker_compose_v2:
+    project_src: "{{ traefik_config_directory }}"
+    state: present

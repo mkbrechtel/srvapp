@@ -1,0 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+---
+- name: Restart traefik
+  community.docker.docker_compose_v2:
+    project_src: "{{ traefik_config_directory }}"
+    state: restarted
